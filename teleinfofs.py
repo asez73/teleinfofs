@@ -11,8 +11,8 @@ from time import time
 from fusepy.fuse import FUSE, Operations, LoggingMixIn
 
 class TeleinfoOperations(LoggingMixIn, Operations):
-    def __init__(self):
-        self.ti = teleinfo.Teleinfo()
+    def __init__(self, serialPort):
+        self.ti = teleinfo.Teleinfo(serialPort)
         
         self.files = {}
         self.data = defaultdict(str)
@@ -67,7 +67,9 @@ class TeleinfoOperations(LoggingMixIn, Operations):
 
 if __name__ == "__main__":        
     #logging.basicConfig(level=logging.DEBUG)
-    if len(sys.argv) == 2:
-        fuse = FUSE(TeleinfoOperations(), mountpoint=sys.argv[1], foreground=False, fsname="TeleinfoFS", allow_other=True)
+    if len(sys.argv) == 3:
+        fuse = FUSE(TeleinfoOperations(serialPort=sys.argv[1]), 
+                    mountpoint=sys.argv[2], foreground=False,
+                    fsname="TeleinfoFS", allow_other=True)
     else:
-        print "Usage : %s <mountpoint>" % sys.argv[0]
+        print "Usage : %s <serialport> <mountpoint>\nExample : %s /dev/ttyS0 /mnt/teleinfo" % (sys.argv[0],sys.argv[0])
