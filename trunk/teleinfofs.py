@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 
 import sys
+import teleinfo
+
 from collections import defaultdict
 from errno import ENOENT
 from stat import S_IFDIR, S_IFLNK, S_IFREG
 from time import time
 
-from fuse import FUSE, FuseError, FuseOperations
+from fusepy.fuse import FUSE, Operations, LoggingMixIn
 
-import logging
-import teleinfo
-
-class MyOperations(FuseOperations):
+class TeleinfoOperations(LoggingMixIn, Operations):
     def __init__(self):
         self.ti = teleinfo.Teleinfo()
         
@@ -68,7 +67,7 @@ class MyOperations(FuseOperations):
 
 if __name__ == "__main__":        
     #logging.basicConfig(level=logging.DEBUG)
-    if len(sys.argv) > 1:
-        fuse = FUSE(MyOperations(), mountpoint=sys.argv[1], foreground=False, fsname="TeleinfoFS", allow_other=True)
+    if len(sys.argv) == 2:
+        fuse = FUSE(TeleinfoOperations(), mountpoint=sys.argv[1], foreground=False, fsname="TeleinfoFS", allow_other=True)
     else:
-        print "Error: Please specify a mount point."
+        print "Usage : %s <mountpoint>" % sys.argv[0]
