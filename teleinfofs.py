@@ -2,6 +2,7 @@
 
 import sys
 import teleinfo
+import logging
 
 from collections import defaultdict
 from errno import ENOENT
@@ -17,11 +18,15 @@ class TeleinfoOperations(LoggingMixIn, Operations):
         self.files = {}
         self.data = defaultdict(str)
         self.fd = 0
-    
+        now = time()
+        self.files['/'] = dict(st_mode=(S_IFDIR | 0775), st_ctime=now, st_mtime=now, st_atime=now)
+        
+    	
     def update(self):
+    	print "*** UPDATE"
         for etiquette, valeur in self.ti.read().items():
             path = "/%s" % etiquette
-            
+            print etiquette
             if not self.data[path]:
                 self.fd += 1
             
@@ -31,7 +36,7 @@ class TeleinfoOperations(LoggingMixIn, Operations):
         
     def getattr(self, path, fh=None):
         if path not in self.files:
-            raise FuseError(ENOENT)
+            raise OSError(ENOENT)
         st = self.files[path]
         if path == '/':
             # Add 2 for `.` and `..` , subtruct 1 for `/`
@@ -39,10 +44,9 @@ class TeleinfoOperations(LoggingMixIn, Operations):
         return st
     
     def init(self):
-        mode = S_IFDIR | 0555
+        mode = S_IFDIR | 0775
         now = time()
-        self.files['/'] = dict(st_mode=mode, st_ctime=now, st_mtime=now,
-                st_atime=now)
+ 	update()
         
     def open(self, path, flags):
         self.update()
